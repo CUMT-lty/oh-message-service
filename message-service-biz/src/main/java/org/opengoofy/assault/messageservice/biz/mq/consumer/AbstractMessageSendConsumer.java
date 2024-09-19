@@ -82,19 +82,21 @@ public abstract class AbstractMessageSendConsumer {
             if (mqCallback == null) {
                 return;
             }
-            String mqCallBackTypes = mqCallback.getType().toLowerCase();
-            boolean executeFail = sendResponse == null || sendResponse.getSuccess();
-            boolean mqCallBackSendFlag = (Objects.equals(mqCallBackTypes, "all")
-                    || (Objects.equals(mqCallBackTypes, "success") && !executeFail)
-                    || (Objects.equals(mqCallBackTypes, "fail") && executeFail));
+            String mqCallBackTypes = mqCallback.getType().toLowerCase(); // 回调类型：success, fail. all
+            boolean executeFail = sendResponse == null || sendResponse.getSuccess(); // 成功失败标识
+            // 判断回调类型
+            boolean mqCallBackSendFlag = (Objects.equals(mqCallBackTypes, "all") // 任何结果都回调
+                    || (Objects.equals(mqCallBackTypes, "success") && !executeFail) // 成功回调
+                    || (Objects.equals(mqCallBackTypes, "fail") && executeFail)); // 失败回调
             if (mqCallBackSendFlag) {
-                MQCallBackTransferDTO mqCallBackTransfer = MQCallBackTransferDTO.builder()
+                MQCallBackTransferDTO mqCallBackTransfer = MQCallBackTransferDTO.builder() // 封装回调消息
                         .errorMsg(executeFail ? Optional.ofNullable(sendResponse).map(each -> each.getErrMsg()).orElse("Send message process execution failed") : null)
                         .success(!executeFail)
                         .msgId(messageSendEvent.getMsgId())
                         .messageSendRequest(messageSendEvent.getMessageSendRequest())
                         .build();
                 MessageWrapper messageWrapper = new MessageWrapper(messageSendEvent.getMsgId(), mqCallBackTransfer);
+                // 通过 tag 区分不同的业务场景（尽量避免添加不必要的 topic）
                 messageCommonSendProduce.send(messageWrapper, MESSAGE_CALLBACK_TOPIC, messageWrapper.getKeys(), String.format(CALLBACK_MESSAGE_SEND_TAG_TEMPLATE, mqCallback.getServiceName(), mqCallback.getBizScene()));
             }
         } catch (Throwable ex) {

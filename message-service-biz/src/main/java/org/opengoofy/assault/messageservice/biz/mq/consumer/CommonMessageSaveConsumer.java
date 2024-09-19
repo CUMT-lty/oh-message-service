@@ -73,8 +73,9 @@ public class CommonMessageSaveConsumer implements RocketMQListener<MessageSaveEv
             }
             sendRecordDO.setSendTime(new Date());
             try {
-                sendRecordMapper.insert(sendRecordDO);
-                sendRecordExtendMapper.insert(sendRecordExtendDO);
+                // 数据库操作
+                sendRecordMapper.insert(sendRecordDO); // 消息发送记录落库
+                sendRecordExtendMapper.insert(sendRecordExtendDO); //
             } catch (Exception ex) {
                 log.error("保存消息发送&参数记录错误，错误信息：{}", ex.getMessage());
             }
