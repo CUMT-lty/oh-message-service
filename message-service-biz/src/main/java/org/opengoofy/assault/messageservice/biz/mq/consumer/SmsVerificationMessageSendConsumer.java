@@ -14,23 +14,23 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * 短信验证码消息发送消费者
+ * 短信验证码消息消费者
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @RocketMQMessageListener(
         topic = MessageRocketMQConstants.MESSAGE_COMMON_TOPIC,
-        selectorExpression = MessageRocketMQConstants.SMS_MESSAGE_VERIFICATION_SEND_TAG,
+        selectorExpression = MessageRocketMQConstants.SMS_MESSAGE_VERIFICATION_SEND_TAG, // 短信验证码消息 tag
         consumerGroup = MessageRocketMQConstants.SMS_MESSAGE_VERIFICATION_SEND_CG
 )
 public class SmsVerificationMessageSendConsumer extends AbstractMessageSendConsumer implements RocketMQListener<MessageSendEvent> {
     
     private final ThreadPoolExecutor smsVerificationMessageConsumeDynamicExecutor;
     
-    @Idempotent(
+    @Idempotent( // 接口幂等性，是基于 Spring AOP 实现的一个注解
             uniqueKeyPrefix = "sms_verification_message_send:",
-            key = "#messageSendEvent.msgId+'_'+#messageSendEvent.hashCode()",
+            key = "#messageSendEvent.msgId+'_'+#messageSendEvent.hashCode()", // Spring 的 SpEL 表达式，可以访问对象属性
             type = IdempotentTypeEnum.SPEL,
             scene = IdempotentSceneEnum.MQ,
             keyTimeout = 7200L

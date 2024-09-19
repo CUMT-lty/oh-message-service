@@ -16,17 +16,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 其它消息发送消费者
+ * 其它消息（除验证码之外的消息）消费者
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@RocketMQMessageListener(
+@RocketMQMessageListener( // 下面三个信息可以确定一个 rocketmq 订阅关系（Subscription）
         topic = MessageRocketMQConstants.MESSAGE_COMMON_TOPIC,
-        selectorExpression = MessageRocketMQConstants.OTHER_MESSAGE_SEND_TAG,
+        selectorExpression = MessageRocketMQConstants.OTHER_MESSAGE_SEND_TAG, // 其他类型消息 tag（除短信验证码之外的消息）
         consumerGroup = MessageRocketMQConstants.OTHER_MESSAGE_SEND_CG
 )
-public class OtherMessageSendConsumer extends AbstractMessageSendConsumer implements RocketMQListener<MessageSendEvent> {
+public class OtherMessageSendConsumer extends AbstractMessageSendConsumer implements RocketMQListener<MessageSendEvent> { // 范型帮助我们解决了消息的 序列化 & 反序列化 问题
 
     private final ThreadPoolExecutor otherMessageConsumeDynamicExecutor;
 

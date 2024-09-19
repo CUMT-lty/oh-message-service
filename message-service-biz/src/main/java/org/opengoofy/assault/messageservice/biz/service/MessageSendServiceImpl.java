@@ -70,8 +70,8 @@ public class MessageSendServiceImpl implements MessageSendService {
     private String getTagByMsgType(MessageSendRequestDTO requestParam) {
         Integer msgType = requestParam.getMsgType();
         if (msgType == MessageTypeEnum.SMS_VERIFICATION_MESSAGE.getType()) {
-            return MessageRocketMQConstants.SMS_MESSAGE_VERIFICATION_SEND_TAG;
+            return MessageRocketMQConstants.SMS_MESSAGE_VERIFICATION_SEND_TAG; // 短信验证码消息 tag
         }
-        return MessageRocketMQConstants.OTHER_MESSAGE_SEND_TAG;
+        return MessageRocketMQConstants.OTHER_MESSAGE_SEND_TAG; // 其他类型消息 tag
     }
 }

@@ -35,20 +35,23 @@ public class MessageCommonSendProduce {
     
     /**
      * 消息发送，自定义 Topic
+     * 此接口必须保证高可用，也就是消息必须发送成功
      */
     public void send(Object messageSendEvent, String topic, String keys, String tag) {
-        keys = StrUtil.isEmpty(keys) ? UUID.randomUUID().toString() : keys;
+        keys = StrUtil.isEmpty(keys) ? UUID.randomUUID().toString() : keys; // 可以理解为自定义业务唯一ID
         Message<?> message = MessageBuilder
-                .withPayload(messageSendEvent)
+                .withPayload(messageSendEvent) // Event 算是消息中心的消息维度
                 .setHeader(MessageConst.PROPERTY_KEYS, keys)
                 .build();
         try {
             String topicAndTag = StrUtil.builder()
                     .append(topic)
                     .append(":")
-                    .append(tag)
+                    .append(tag) // 设置 tag 是为了区分短信验证码消息和其他类型的消息
                     .toString();
-            SendResult sendResult = rocketMQTemplate.syncSend(topicAndTag, message, 2000);
+            // 必须设定超时时间，防止servlet容器线程一直阻塞
+            // 如果大量线程阻塞：容器线程池打满，导致后续请求进阻塞队列，服务假死。阻塞队列打满，导致 OOM，服务彻底挂掉。
+            SendResult sendResult = rocketMQTemplate.syncSend(topicAndTag, message, 2000); // 使用同步发送方式，保证消息在发送阶段不丢
             log.info("消息发送结果：{}，消息ID：{}，消息Keys：{}", sendResult.getSendStatus(), sendResult.getMsgId(), keys);
         } catch (Throwable ex) {
             log.error("消息发送失败，消息体：{}", JSON.toJSONString(messageSendEvent), ex);
