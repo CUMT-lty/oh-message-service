@@ -26,7 +26,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 )
 public class SmsVerificationMessageSendConsumer extends AbstractMessageSendConsumer implements RocketMQListener<MessageSendEvent> {
     
-    private final ThreadPoolExecutor smsVerificationMessageConsumeDynamicExecutor;
+    private final ThreadPoolExecutor smsVerificationMessageConsumeDynamicExecutor; // 动态线程池
     
     @Idempotent( // 接口幂等性，是基于 Spring AOP 实现的一个注解
             uniqueKeyPrefix = "sms_verification_message_send:",
@@ -37,6 +37,6 @@ public class SmsVerificationMessageSendConsumer extends AbstractMessageSendConsu
     )
     @Override
     public void onMessage(MessageSendEvent messageSendEvent) {
-        smsVerificationMessageConsumeDynamicExecutor.execute(() -> sendMessage(messageSendEvent));
+        smsVerificationMessageConsumeDynamicExecutor.execute(() -> sendMessage(messageSendEvent)); // 线程池
     }
 }

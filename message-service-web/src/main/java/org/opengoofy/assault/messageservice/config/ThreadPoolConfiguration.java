@@ -25,7 +25,7 @@ public class ThreadPoolConfiguration {
     @DynamicThreadPool
     public ThreadPoolExecutor smsVerificationMessageConsumeDynamicExecutor() {
         String threadPoolId = "sms-verification-message-consume";
-        return ThreadPoolBuilder.builder()
+        return ThreadPoolBuilder.builder() // 动态线程池
                 .threadFactory(threadPoolId)
                 .threadPoolId(threadPoolId)
                 .dynamicPool()

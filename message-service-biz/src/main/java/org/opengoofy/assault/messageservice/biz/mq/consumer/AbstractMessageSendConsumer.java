@@ -49,10 +49,10 @@ public abstract class AbstractMessageSendConsumer {
         MessagePlatformSendResponseDTO sendResponse = null;
         String templateId = messageSendEvent.getMessageSendRequest().getTemplateId();
         try {
-            TemplateConfigDO smsMessageTemplates = distributedCache.safeGet(
+            TemplateConfigDO smsMessageTemplates = distributedCache.safeGet( // 获取短信验证码消息模版
                     MESSAGE_TEMPLATE_CACHE_PREFIX_KEY + templateId,
                     TemplateConfigDO.class,
-                    () -> {
+                    () -> { // 函数式编程
                         TemplateConfigDO templateConfigDO = templateConfigMapper.selectOne(
                                 Wrappers.lambdaQuery(TemplateConfigDO.class).eq(TemplateConfigDO::getTemplateId, templateId)
                         );
@@ -61,9 +61,9 @@ public abstract class AbstractMessageSendConsumer {
                     new Long(DEFAULT_CACHE_TIMOUT)
             );
             messageSendEvent.setSmsOptionalChannels(StrUtil.split(smsMessageTemplates.getChannelIds(), ","));
-            // 选择发送消息具体实现
+            // 选择不同的消息发送服务（阿里云、腾讯云），因为后续还需扩展不同的云服务提供商，所以内部使用策略模式处理的
             MessageSendService messageSendService = messageSendChannelSelector.select(messageSendEvent);
-            // 根据消息发送器发送消息到用户
+            // 使用具体的消息发送服务发送消息到用户
             sendResponse = messageSendService.send(messageSendEvent);
         } catch (Throwable ex) {
             log.error("发送消息流程执行失败，消息入参：{}", JSON.toJSONString(messageSendEvent), ex);

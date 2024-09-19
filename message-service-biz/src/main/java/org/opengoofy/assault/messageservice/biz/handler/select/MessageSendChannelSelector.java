@@ -33,9 +33,11 @@ public class MessageSendChannelSelector {
         MessageSendRequestDTO messageSendRequest = messageSendEvent.getMessageSendRequest();
         // 短信消息处理
         if (SMS_MESSAGE_CHANNELS.contains(messageSendRequest.getMsgType())) {
+            // 通过权重去选择短信服务提供商
             String selectChannel = smsChannelWeightRule.choose(messageSendRequest.getMsgType(), messageSendEvent.getSmsOptionalChannels());
             // 删除短信可选择的渠道并设置为当前发送渠道
             messageSendEvent.removeAndSetSmsChannel(selectChannel);
+            // 内部是策略模式实现的，根据 mark 查询具体的策略
             MessageSendService messageSendService = (MessageSendService) abstractStrategyChoose.choose(SMS_MESSAGE_KEY + StrUtil.split(selectChannel, "_").get(0));
             return messageSendService;
         }
